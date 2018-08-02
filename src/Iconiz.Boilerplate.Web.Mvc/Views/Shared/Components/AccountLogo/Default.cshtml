@@ -1,0 +1,8 @@
+﻿@using Iconiz.Boilerplate.Web.Theme
+@model Iconiz.Boilerplate.Web.Views.Shared.Components.AccountLogo.AccountLogoViewModel
+@inject IUiThemeCustomizer UiThemeCustomizer
+<div class="logo">
+    <a href="~/">
+        <img src="@Model.GetLogoUrl(ApplicationPath)" alt="" width="139" height="35" />
+    </a>
+</div>

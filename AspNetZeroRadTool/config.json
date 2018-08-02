@@ -1,0 +1,9 @@
+﻿{
+  "CompanyName": "Iconiz",
+  "ProjectName": "Boilerplate",
+  "ProjectType": "ProjectType",
+  "ProjectVersion":"ProjectVersion",
+  "ApplicationAreaName": "AppAreaName",
+  "AngularSrcPath": "\\..\\..\\angular\\src\\",
+  "LicenseCode": "LicenseCodePlaceHolderToReplace1"
+}
