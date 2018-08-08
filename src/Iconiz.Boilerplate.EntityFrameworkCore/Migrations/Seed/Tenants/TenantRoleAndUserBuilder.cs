@@ -60,7 +60,7 @@ namespace Iconiz.Boilerplate.Migrations.Seed.Tenants
                 adminUser = User.CreateTenantAdminUser(_tenantId, "admin@defaulttenant.com");
                 adminUser.Password = new PasswordHasher<User>(new OptionsWrapper<PasswordHasherOptions>(new PasswordHasherOptions())).HashPassword(adminUser, "123qwe");
                 adminUser.IsEmailConfirmed = true;
-                adminUser.ShouldChangePasswordOnNextLogin = true;
+                adminUser.ShouldChangePasswordOnNextLogin = false;
                 adminUser.IsActive = true;
 
                 _context.Users.Add(adminUser);

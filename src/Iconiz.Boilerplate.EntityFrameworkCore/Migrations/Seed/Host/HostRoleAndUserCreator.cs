@@ -52,7 +52,7 @@ namespace Iconiz.Boilerplate.Migrations.Seed.Host
                     Surname = "admin",
                     EmailAddress = "admin@aspnetzero.com",
                     IsEmailConfirmed = true,
-                    ShouldChangePasswordOnNextLogin = true,
+                    ShouldChangePasswordOnNextLogin = false,
                     IsActive = true,
                     Password = "AM4OLBpptxBYmM79lGOX9egzZk3vIQU3d/gFCJzaBjAPXzYIK3tQ2N7X4fcrHtElTw==" //123qwe
                 };

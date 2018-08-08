@@ -476,6 +476,30 @@ namespace Iconiz.Boilerplate.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "IconizTeamMembers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<long>(nullable: true),
+                    Priority = table.Column<int>(nullable: false),
+                    Name_Chn = table.Column<string>(nullable: true),
+                    Name_Eng = table.Column<string>(nullable: true),
+                    Title_Chn = table.Column<string>(nullable: true),
+                    Title_Eng = table.Column<string>(nullable: true),
+                    Description_Chn = table.Column<string>(nullable: true),
+                    Description_Eng = table.Column<string>(nullable: true),
+                    LinkedIn = table.Column<string>(nullable: true),
+                    CreationTime = table.Column<DateTime>(nullable: false),
+                    ProfilePictureId = table.Column<Guid>(nullable: true),
+                    IsActive = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IconizTeamMembers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AbpFeatures",
                 columns: table => new
                 {
@@ -1314,6 +1338,9 @@ namespace Iconiz.Boilerplate.Migrations
 
             migrationBuilder.DropTable(
                 name: "AppSubscriptionPayments");
+
+            migrationBuilder.DropTable(
+                name: "IconizTeamMembers");
 
             migrationBuilder.DropTable(
                 name: "AbpEntityChanges");

@@ -30,6 +30,8 @@ namespace Iconiz.Boilerplate.EntityFrameworkCore
         public virtual DbSet<Invoice> Invoices { get; set; }
 
         public virtual DbSet<PersistedGrantEntity> PersistedGrants { get; set; }
+        
+        public virtual DbSet<IconizTeamMember.IconizTeamMember> IconizTeamMembers { get; set; }
 
         public BoilerplateDbContext(DbContextOptions<BoilerplateDbContext> options)
             : base(options)

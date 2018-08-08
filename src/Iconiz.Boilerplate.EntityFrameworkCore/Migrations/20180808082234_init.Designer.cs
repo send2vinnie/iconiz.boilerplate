@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Iconiz.Boilerplate.Migrations
 {
     [DbContext(typeof(BoilerplateDbContext))]
-    [Migration("20180801092800_init")]
+    [Migration("20180808082234_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1103,6 +1103,40 @@ namespace Iconiz.Boilerplate.Migrations
                     b.HasIndex("TenantId", "UserId");
 
                     b.ToTable("AppFriendships");
+                });
+
+            modelBuilder.Entity("Iconiz.Boilerplate.IconizTeamMember.IconizTeamMember", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<string>("Description_Chn");
+
+                    b.Property<string>("Description_Eng");
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<string>("LinkedIn");
+
+                    b.Property<string>("Name_Chn");
+
+                    b.Property<string>("Name_Eng");
+
+                    b.Property<int>("Priority");
+
+                    b.Property<Guid?>("ProfilePictureId");
+
+                    b.Property<string>("Title_Chn");
+
+                    b.Property<string>("Title_Eng");
+
+                    b.Property<long?>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IconizTeamMembers");
                 });
 
             modelBuilder.Entity("Iconiz.Boilerplate.MultiTenancy.Accounting.Invoice", b =>

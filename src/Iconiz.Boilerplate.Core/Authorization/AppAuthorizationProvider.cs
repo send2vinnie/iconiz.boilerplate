@@ -59,6 +59,11 @@ namespace Iconiz.Boilerplate.Authorization
 
             administration.CreateChildPermission(AppPermissions.Pages_Administration_UiCustomization, L("VisualSettings"));
 
+            var members = administration.CreateChildPermission(AppPermissions.Pages_IconizTeamMember, L("Members"));
+            members.CreateChildPermission(AppPermissions.Pages_IconizTeamMember_Create, L("CreatingNewMember"));
+            members.CreateChildPermission(AppPermissions.Pages_IconizTeamMember_Edit, L("EditingMember"));
+            members.CreateChildPermission(AppPermissions.Pages_IconizTeamMember_Delete, L("DeletingMember"));
+
             //TENANT-SPECIFIC PERMISSIONS
 
             pages.CreateChildPermission(AppPermissions.Pages_Tenant_Dashboard, L("Dashboard"), multiTenancySides: MultiTenancySides.Tenant);
@@ -71,7 +76,7 @@ namespace Iconiz.Boilerplate.Authorization
             var editions = pages.CreateChildPermission(AppPermissions.Pages_Editions, L("Editions"), multiTenancySides: MultiTenancySides.Host);
             editions.CreateChildPermission(AppPermissions.Pages_Editions_Create, L("CreatingNewEdition"), multiTenancySides: MultiTenancySides.Host);
             editions.CreateChildPermission(AppPermissions.Pages_Editions_Edit, L("EditingEdition"), multiTenancySides: MultiTenancySides.Host);
-            editions.CreateChildPermission(AppPermissions.Pages_Editions_Delete, L("DeletingEdition"), multiTenancySides: MultiTenancySides.Host);
+            editions.CreateChildPermission(AppPermissions.Pages_Editions_Delete, L("DeletingEdition"), multiTenancySides: MultiTenancySides.Host);           
 
             var tenants = pages.CreateChildPermission(AppPermissions.Pages_Tenants, L("Tenants"), multiTenancySides: MultiTenancySides.Host);
             tenants.CreateChildPermission(AppPermissions.Pages_Tenants_Create, L("CreatingNewTenant"), multiTenancySides: MultiTenancySides.Host);

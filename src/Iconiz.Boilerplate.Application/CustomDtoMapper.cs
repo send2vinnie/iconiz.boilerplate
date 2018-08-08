@@ -33,6 +33,7 @@ using Iconiz.Boilerplate.MultiTenancy.Payments.Dto;
 using Iconiz.Boilerplate.Notifications.Dto;
 using Iconiz.Boilerplate.Organizations.Dto;
 using Iconiz.Boilerplate.Sessions.Dto;
+using Iconiz.Boilerplate.IconizTeamMember.Dto;
 
 namespace Iconiz.Boilerplate
 {
@@ -127,6 +128,7 @@ namespace Iconiz.Boilerplate
             configuration.CreateMap<OrganizationUnit, OrganizationUnitDto>();
 
             /* ADD YOUR OWN CUSTOM AUTOMAPPER MAPPINGS HERE */
+            configuration.CreateMap<TeamMemberEditDto, IconizTeamMember.IconizTeamMember>().ReverseMap();
         }
     }
 }
