@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using Abp;
@@ -172,23 +171,7 @@ namespace Iconiz.Boilerplate.Authorization.Users.Profile
         {
             var tempProfilePicturePath = Path.Combine(_appFolders.TempFileDownloadFolder, input.FileName);
 
-            byte[] byteArray;
-
-            using (var fsTempProfilePicture = new FileStream(tempProfilePicturePath, FileMode.Open))
-            {
-                using (var bmpImage = new Bitmap(fsTempProfilePicture))
-                {
-                    var width = (input.Width == 0 || input.Width > bmpImage.Width) ? bmpImage.Width : input.Width;
-                    var height = (input.Height == 0 || input.Height > bmpImage.Height) ? bmpImage.Height : input.Height;
-                    var bmCrop = bmpImage.Clone(new Rectangle(input.X, input.Y, width, height), bmpImage.PixelFormat);
-
-                    using (var stream = new MemoryStream())
-                    {
-                        bmCrop.Save(stream, bmpImage.RawFormat);
-                        byteArray = stream.ToArray();
-                    }
-                }
-            }
+            byte[] byteArray = File.ReadAllBytes(tempProfilePicturePath);
 
             if (byteArray.Length > MaxProfilPictureBytes)
             {
@@ -259,6 +242,7 @@ namespace Iconiz.Boilerplate.Authorization.Users.Profile
             }
         }
 
+        [AbpAllowAnonymous]
         public async Task<GetProfilePictureOutput> GetProfilePictureById(Guid profilePictureId)
         {
             return await GetProfilePictureByIdInternal(profilePictureId);

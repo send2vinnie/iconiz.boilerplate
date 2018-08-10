@@ -43,6 +43,11 @@ namespace Iconiz.Boilerplate.IconizTeamMember
             _binaryObjectManager = binaryObjectManager;
         }
 
+        [AbpAllowAnonymous]
+        public async Task<List<IconizTeamMember>> GetAll()
+        {
+            return await _iconizTeamMemberRepository.GetAll().Where(f => f.IsActive).OrderBy(f => f.Priority).ToListAsync();
+        }
 
         public async Task<PagedResultDto<IconizTeamMemberListDto>> GetIconizTeamMembers(GetIconizTeamMembersInput input)
         {
@@ -108,7 +113,7 @@ namespace Iconiz.Boilerplate.IconizTeamMember
         protected virtual async Task UpdateIconizTeamMemberAsync(TeamMemberEditDto input)
         {
             var iconizTeamMember = await _iconizTeamMemberRepository.GetAsync(input.Id.Value);
-         
+
             if (!string.IsNullOrEmpty(input.ProfilePictureFileName))
             {
                 if (iconizTeamMember.ProfilePictureId.HasValue)

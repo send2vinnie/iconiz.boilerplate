@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using Abp.Extensions;
@@ -47,10 +45,11 @@ namespace Iconiz.Boilerplate.Web.Controllers
                     fileBytes = stream.GetAllBytes();
                 }
 
-                if (!ImageFormatHelper.GetRawImageFormat(fileBytes).IsIn(ImageFormat.Jpeg, ImageFormat.Png, ImageFormat.Gif))
-                {
-                    throw new Exception("Uploaded file is not an accepted image file !");
-                }
+                //exception on linux
+                // if (!fImageFormatHelper.GetRawImageFormat(fileBytes).IsIn(ImageFormat.Jpeg, ImageFormat.Png, ImageFormat.Gif))
+                //{
+                 //   throw new Exception("Uploaded file is not an accepted image file !");
+                //}
 
                 //Delete old temp profile pictures
                 AppFileHelper.DeleteFilesInFolderIfExists(_appFolders.TempFileDownloadFolder, "userProfileImage_" + AbpSession.GetUserId());
@@ -61,15 +60,12 @@ namespace Iconiz.Boilerplate.Web.Controllers
                 var tempFilePath = Path.Combine(_appFolders.TempFileDownloadFolder, tempFileName);
                 System.IO.File.WriteAllBytes(tempFilePath, fileBytes);
 
-                using (var bmpImage = new Bitmap(tempFilePath))
+                return new UploadProfilePictureOutput
                 {
-                    return new UploadProfilePictureOutput
-                    {
-                        FileName = tempFileName,
-                        Width = bmpImage.Width,
-                        Height = bmpImage.Height
-                    };
-                }
+                    FileName = tempFileName,
+                    Width = 0,
+                    Height = 0
+                };
             }
             catch (UserFriendlyException ex)
             {

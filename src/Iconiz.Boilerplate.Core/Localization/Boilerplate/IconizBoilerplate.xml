@@ -787,5 +787,18 @@
         <text name="Yellow">Yellow</text>
         <text name="UiCustomization_HeaderSkin">Skin</text>
         <text name="TenantsCannotCreateLanguage">Tenants cannot create language.</text>
+        <!--Iconiz Addon Trans-->
+      <text name="TeamMembers">Team Members</text>
+      <text name="CreateNewMember">Create New Member</text>
+      <text name="IconizTeamMember">Iconiz Team Member</text>
+      <text name="MembersHeaderInfo">Member Information Edit</text>
+      <text name="name_Chn">Chinese Name</text>
+      <text name="name_Eng">English Name</text>
+      <text name="priority">Priority</text>
+      <text name="title_Chn">Chinese Title</text>
+      <text name="title_Eng">English Title</text>
+      <text name="description_Chn">Chinese Description</text>
+      <text name="description_Eng">English Description</text>
+      <text name="linkedIn">LinkedIn</text>
     </texts>
 </localizationDictionary>

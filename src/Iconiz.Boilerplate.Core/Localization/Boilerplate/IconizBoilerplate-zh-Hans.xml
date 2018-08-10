@@ -480,5 +480,19 @@
     <text name="PleaseWaitToConfirmYourEmailMessage">正在确认您的电子邮件地址，请稍后...</text>
     <text name="ChatIsConnecting">正在连接聊天...</text>
     <text name="Note_RefreshPageForPermissionChanges">如果您正在更改自己的权限，则可能需要刷新页面（F5），以在您所做的权限更改生效！</text>
+    <!--Iconiz Addon Trans-->
+    <text name="TeamMembers">团队成员</text>
+    <text name="CreateNewMember">创建新成员</text>
+    <text name="IconizTeamMember">Iconiz团队成员</text>
+    <text name="MembersHeaderInfo">新建和编辑成员信息</text>
+    <text name="name_Chn">中文名</text>
+    <text name="name_Eng">英文名</text>
+    <text name="priority">优先级</text>
+    <text name="title_Chn">中文职位</text>
+    <text name="title_Eng">英文职位</text>
+    <text name="description_Chn">中文描述</text>
+    <text name="description_Eng">英文描述</text>
+    <text name="linkedIn">LinkedIn</text>
+    <text name="TotalRecordsCount">共计: {0}</text>
   </texts>
 </localizationDictionary>
