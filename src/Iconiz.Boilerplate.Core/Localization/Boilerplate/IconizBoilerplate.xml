@@ -800,5 +800,6 @@
       <text name="description_Chn">Chinese Description</text>
       <text name="description_Eng">English Description</text>
       <text name="linkedIn">LinkedIn</text>
+      <text name="marginTop">Cut Out From Top(px/450px)</text>
     </texts>
 </localizationDictionary>

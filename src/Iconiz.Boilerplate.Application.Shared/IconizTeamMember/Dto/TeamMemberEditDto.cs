@@ -30,5 +30,7 @@ namespace Iconiz.Boilerplate.IconizTeamMember.Dto
         public Guid? ProfilePictureId { get; set; }
 
         public bool IsActive { get; set; }
+
+        public int MarginTop { get; set; }
     }
 }

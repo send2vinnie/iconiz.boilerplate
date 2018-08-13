@@ -494,5 +494,6 @@
     <text name="description_Eng">英文描述</text>
     <text name="linkedIn">LinkedIn</text>
     <text name="TotalRecordsCount">共计: {0}</text>
+    <text name="marginTop">从顶端切除(px/450px)</text>
   </texts>
 </localizationDictionary>

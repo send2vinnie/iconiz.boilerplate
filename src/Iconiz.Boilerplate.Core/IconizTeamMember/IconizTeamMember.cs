@@ -36,6 +36,8 @@ namespace Iconiz.Boilerplate.IconizTeamMember
 
         public bool IsActive { get; set; }
 
+        public int MarginTop { get; set; }
+
         protected IconizTeamMember()
         {
         }
