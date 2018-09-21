@@ -22,7 +22,7 @@ using Iconiz.Boilerplate.Chat;
 using Iconiz.Boilerplate.Configuration;
 using Iconiz.Boilerplate.EntityFrameworkCore;
 using Iconiz.Boilerplate.Web.Authentication.JwtBearer;
-using Iconiz.Boilerplate.Web.Authentication.TwoFactor;
+using Iconiz.Boilerplate.Authentication.TwoFactor;
 using Iconiz.Boilerplate.Web.Chat.SignalR;
 using Iconiz.Boilerplate.Web.Configuration;
 

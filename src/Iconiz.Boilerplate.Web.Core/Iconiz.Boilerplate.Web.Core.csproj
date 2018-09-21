@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <Import Project="..\..\common.props"></Import>
-
+  <Import Project="..\..\common.props">
+  </Import>
   <PropertyGroup>
     <TargetFrameworks>net461;netcoreapp2.1</TargetFrameworks>
     <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
@@ -12,12 +11,10 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <RootNamespace>Iconiz.Boilerplate.Web</RootNamespace>
   </PropertyGroup>
- 
   <ItemGroup>
     <ProjectReference Include="..\Iconiz.Boilerplate.Application\Iconiz.Boilerplate.Application.csproj" />
     <ProjectReference Include="..\Iconiz.Boilerplate.EntityFrameworkCore\Iconiz.Boilerplate.EntityFrameworkCore.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Abp.AspNetCore.SignalR" Version="3.7.2" />
     <PackageReference Include="Abp.AspNetZeroCore.Web" Version="1.1.1" />
@@ -25,6 +22,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="2.1.0" />
+    <PackageReference Include="Senparc.Weixin.MP" Version="16.3.3" />
+    <PackageReference Include="Senparc.Weixin.Open" Version="4.1.7" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="2.5.0" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.6.19" />
     <PackageReference Include="PaulMiami.AspNetCore.Mvc.Recaptcha" Version="1.2.1" />
@@ -32,29 +31,23 @@
     <PackageReference Include="System.Net.Http" Version="4.3.3" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="2.6.0" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Abp.ZeroCore.IdentityServer4" Version="3.7.2" />
     <PackageReference Include="Abp.AspNetCore" Version="3.7.2" />
     <PackageReference Include="Abp.HangFire.AspNetCore" Version="3.7.2" />
     <PackageReference Include="Abp.RedisCache" Version="3.7.2" />
   </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <PackageReference Include="Abp.Owin" Version="3.7.2" />
   </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461'">
     <PackageReference Include="Microsoft.AspNetCore.Owin" Version="2.1.0" />
   </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-
   <PropertyGroup Condition="'$(TargetFramework)'=='net461'">
     <DefineConstants>NET461</DefineConstants>
   </PropertyGroup>
-
 </Project>

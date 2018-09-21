@@ -21,6 +21,8 @@
     <EmbeddedResource Include="Emailing\EmailTemplates\default.html" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="aliyun-net-sdk-core" Version="1.1.12" />
+    <PackageReference Include="aliyun-net-sdk-dysms" Version="1.0.6.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.1.0" />

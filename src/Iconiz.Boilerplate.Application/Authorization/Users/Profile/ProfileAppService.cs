@@ -17,6 +17,7 @@ using Iconiz.Boilerplate.Authentication.TwoFactor.Google;
 using Iconiz.Boilerplate.Authorization.Users.Dto;
 using Iconiz.Boilerplate.Authorization.Users.Profile.Cache;
 using Iconiz.Boilerplate.Authorization.Users.Profile.Dto;
+using Iconiz.Boilerplate.Configuration;
 using Iconiz.Boilerplate.Friendships;
 using Iconiz.Boilerplate.Identity;
 using Iconiz.Boilerplate.Security;
@@ -71,7 +72,8 @@ namespace Iconiz.Boilerplate.Authorization.Users.Profile
             {
                 userProfileEditDto.Timezone = await SettingManager.GetSettingValueAsync(TimingSettingNames.TimeZone);
 
-                var defaultTimeZoneId = await _timeZoneService.GetDefaultTimezoneAsync(SettingScopes.User, AbpSession.TenantId);
+                var defaultTimeZoneId =
+                    await _timeZoneService.GetDefaultTimezoneAsync(SettingScopes.User, AbpSession.TenantId);
                 if (userProfileEditDto.Timezone == defaultTimeZoneId)
                 {
                     userProfileEditDto.Timezone = string.Empty;
@@ -99,14 +101,16 @@ namespace Iconiz.Boilerplate.Authorization.Users.Profile
             var user = await GetCurrentUserAsync();
             var code = RandomHelper.GetRandom(100000, 999999).ToString();
             var cacheKey = AbpSession.ToUserIdentifier().ToString();
-            var cacheItem = new SmsVerificationCodeCacheItem { Code = code };
+            var cacheItem = new SmsVerificationCodeCacheItem {Code = code};
 
             _cacheManager.GetSmsVerificationCodeCache().Set(
                 cacheKey,
                 cacheItem
             );
 
-            await _smsSender.SendAsync(user.PhoneNumber, L("SmsVerificationMessage", code));
+            await _smsSender.SendAsync(user.PhoneNumber,
+                SettingManager.GetSettingValue(AppSettings.SMSManagement.UserIdentityValidateTemplateCode),
+                "{\"code\":\"" + code + "\"}");
         }
 
         public async Task VerifySmsCode(VerifySmsCodeInputDto input)
@@ -149,12 +153,15 @@ namespace Iconiz.Boilerplate.Authorization.Users.Profile
             {
                 if (input.Timezone.IsNullOrEmpty())
                 {
-                    var defaultValue = await _timeZoneService.GetDefaultTimezoneAsync(SettingScopes.User, AbpSession.TenantId);
-                    await SettingManager.ChangeSettingForUserAsync(AbpSession.ToUserIdentifier(), TimingSettingNames.TimeZone, defaultValue);
+                    var defaultValue =
+                        await _timeZoneService.GetDefaultTimezoneAsync(SettingScopes.User, AbpSession.TenantId);
+                    await SettingManager.ChangeSettingForUserAsync(AbpSession.ToUserIdentifier(),
+                        TimingSettingNames.TimeZone, defaultValue);
                 }
                 else
                 {
-                    await SettingManager.ChangeSettingForUserAsync(AbpSession.ToUserIdentifier(), TimingSettingNames.TimeZone, input.Timezone);
+                    await SettingManager.ChangeSettingForUserAsync(AbpSession.ToUserIdentifier(),
+                        TimingSettingNames.TimeZone, input.Timezone);
                 }
             }
         }
@@ -175,7 +182,8 @@ namespace Iconiz.Boilerplate.Authorization.Users.Profile
 
             if (byteArray.Length > MaxProfilPictureBytes)
             {
-                throw new UserFriendlyException(L("ResizedProfilePicture_Warn_SizeLimit", AppConsts.ResizedMaxProfilPictureBytesUserFriendlyValue));
+                throw new UserFriendlyException(L("ResizedProfilePicture_Warn_SizeLimit",
+                    AppConsts.ResizedMaxProfilPictureBytesUserFriendlyValue));
             }
 
             var user = await UserManager.GetUserByIdAsync(AbpSession.GetUserId());
@@ -198,11 +206,21 @@ namespace Iconiz.Boilerplate.Authorization.Users.Profile
         {
             var passwordComplexitySetting = new PasswordComplexitySetting
             {
-                RequireDigit = await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireDigit),
-                RequireLowercase = await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireLowercase),
-                RequireNonAlphanumeric = await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireNonAlphanumeric),
-                RequireUppercase = await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequireUppercase),
-                RequiredLength = await SettingManager.GetSettingValueAsync<int>(AbpZeroSettingNames.UserManagement.PasswordComplexity.RequiredLength)
+                RequireDigit =
+                    await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement
+                        .PasswordComplexity.RequireDigit),
+                RequireLowercase =
+                    await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement
+                        .PasswordComplexity.RequireLowercase),
+                RequireNonAlphanumeric =
+                    await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement
+                        .PasswordComplexity.RequireNonAlphanumeric),
+                RequireUppercase =
+                    await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement
+                        .PasswordComplexity.RequireUppercase),
+                RequiredLength =
+                    await SettingManager.GetSettingValueAsync<int>(AbpZeroSettingNames.UserManagement.PasswordComplexity
+                        .RequiredLength)
             };
 
             return new GetPasswordComplexitySettingOutput
@@ -225,7 +243,9 @@ namespace Iconiz.Boilerplate.Authorization.Users.Profile
 
         public async Task<GetProfilePictureOutput> GetFriendProfilePictureById(GetFriendProfilePictureByIdInput input)
         {
-            if (!input.ProfilePictureId.HasValue || await _friendshipManager.GetFriendshipOrNullAsync(AbpSession.ToUserIdentifier(), new UserIdentifier(input.TenantId, input.UserId)) == null)
+            if (!input.ProfilePictureId.HasValue ||
+                await _friendshipManager.GetFriendshipOrNullAsync(AbpSession.ToUserIdentifier(),
+                    new UserIdentifier(input.TenantId, input.UserId)) == null)
             {
                 return new GetProfilePictureOutput(string.Empty);
             }

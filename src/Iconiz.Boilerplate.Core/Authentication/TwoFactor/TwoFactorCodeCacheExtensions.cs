@@ -1,6 +1,6 @@
 ﻿using Abp.Runtime.Caching;
 
-namespace Iconiz.Boilerplate.Web.Authentication.TwoFactor
+namespace Iconiz.Boilerplate.Authentication.TwoFactor
 {
     public static class TwoFactorCodeCacheExtensions
     {

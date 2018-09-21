@@ -4,6 +4,7 @@ namespace Iconiz.Boilerplate.Identity
 {
     public interface ISmsSender
     {
-        Task SendAsync(string number, string message);
+        void Send(string to, string templateCode, string templateParams);
+        Task SendAsync(string to, string templateCode, string templateParams);
     }
 }

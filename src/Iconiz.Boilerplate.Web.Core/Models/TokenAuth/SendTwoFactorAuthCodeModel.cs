@@ -10,4 +10,13 @@ namespace Iconiz.Boilerplate.Web.Models.TokenAuth
         [Required]
         public string Provider { get; set; }
     }
+    
+    public class SendTwoFactorValidateCodeModel
+    {
+        [Required]
+        public string UserName { get; set; }
+
+        [Required]
+        public string Provider { get; set; }
+    }
 }

@@ -31,11 +31,14 @@ using Iconiz.Boilerplate.Authorization;
 using Iconiz.Boilerplate.Authorization.Users;
 using Iconiz.Boilerplate.MultiTenancy;
 using Iconiz.Boilerplate.Web.Authentication.JwtBearer;
-using Iconiz.Boilerplate.Web.Authentication.TwoFactor;
+using Iconiz.Boilerplate.Authentication.TwoFactor;
 using Iconiz.Boilerplate.Web.Models.TokenAuth;
 using Iconiz.Boilerplate.Authorization.Impersonation;
 using Iconiz.Boilerplate.Identity;
 using Iconiz.Boilerplate.Notifications;
+using Iconiz.Boilerplate.Configuration;
+using Iconiz.Boilerplate.Url;
+using Senparc.Weixin.MP.AdvancedAPIs;
 
 namespace Iconiz.Boilerplate.Web.Controllers
 {
@@ -59,6 +62,7 @@ namespace Iconiz.Boilerplate.Web.Controllers
         private readonly IAppNotifier _appNotifier;
         private readonly ISmsSender _smsSender;
         private readonly IEmailSender _emailSender;
+        private readonly IWebUrlService _webUrlService;
         private readonly IdentityOptions _identityOptions;
         private readonly GoogleAuthenticatorProvider _googleAuthenticatorProvider;
 
@@ -79,6 +83,7 @@ namespace Iconiz.Boilerplate.Web.Controllers
             ISmsSender smsSender,
             IEmailSender emailSender,
             IOptions<IdentityOptions> identityOptions,
+            IWebUrlService webUrlService,
             GoogleAuthenticatorProvider googleAuthenticatorProvider)
         {
             _logInManager = logInManager;
@@ -96,6 +101,7 @@ namespace Iconiz.Boilerplate.Web.Controllers
             _appNotifier = appNotifier;
             _smsSender = smsSender;
             _emailSender = emailSender;
+            _webUrlService = webUrlService;
             _googleAuthenticatorProvider = googleAuthenticatorProvider;
             _identityOptions = identityOptions.Value;
         }
@@ -111,10 +117,12 @@ namespace Iconiz.Boilerplate.Web.Controllers
 
             var returnUrl = model.ReturnUrl;
 
-            if (model.SingleSignIn.HasValue && model.SingleSignIn.Value && loginResult.Result == AbpLoginResultType.Success)
+            if (model.SingleSignIn.HasValue && model.SingleSignIn.Value &&
+                loginResult.Result == AbpLoginResultType.Success)
             {
                 loginResult.User.SetSignInToken();
-                returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, loginResult.User.SignInToken, loginResult.User.Id, loginResult.User.TenantId);
+                returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, loginResult.User.SignInToken,
+                    loginResult.User.Id, loginResult.User.TenantId);
             }
 
             //Password reset
@@ -163,12 +171,21 @@ namespace Iconiz.Boilerplate.Web.Controllers
             {
                 AccessToken = accessToken,
                 EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
-                ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
+                ExpireInSeconds = (int) _configuration.Expiration.TotalSeconds,
                 TwoFactorRememberClientToken = twoFactorRememberClientToken,
                 UserId = loginResult.User.Id,
                 ReturnUrl = returnUrl
             };
         }
+
+        //public async Task<string> GetWeixinLoginUrl()
+        //{
+        //    var redirecturl = "http://" + _webUrlService.GetSiteRootAddress().EnsureEndsWith('/') +
+        //                      "/main/BindWeixinLoginCallback";
+        //    var weixinUrl = OAuthApi.GetAuthorizeUrl(AppSettings.WechatManagement.AppKey, redirecturl, "iconizio",
+        //        Senparc.Weixin.MP.OAuthScope.snsapi_base);
+        //    return weixinUrl;
+        //}
 
         [HttpPost]
         public async Task SendTwoFactorAuthCode([FromBody] SendTwoFactorAuthCodeModel model)
@@ -199,18 +216,57 @@ namespace Iconiz.Boilerplate.Web.Controllers
                 }
                 else if (model.Provider == "Phone")
                 {
-                    await _smsSender.SendAsync(await _userManager.GetPhoneNumberAsync(user), message);
+                    await _smsSender.SendAsync(await _userManager.GetPhoneNumberAsync(user),
+                        SettingManager.GetSettingValue(AppSettings.SMSManagement.UserIdentityValidateTemplateCode),
+                        "{\"code\":\"" + cacheItem.Code + "\"}");
                 }
             }
 
             _cacheManager.GetTwoFactorCodeCache().Set(
-                    cacheKey,
-                    cacheItem
-                );
+                cacheKey,
+                cacheItem
+            );
             _cacheManager.GetCache("ProviderCache").Set(
                 "Provider",
                 model.Provider
             );
+        }
+
+        [HttpPost]
+        public async Task SendTwoFactorValidateCode([FromBody] SendTwoFactorValidateCodeModel model)
+        {
+            var user = _userManager.FindByNameOrEmailAsync(model.UserName);
+            if(user!=null)
+                throw new UserFriendlyException(L("UserAlreadyRegistered"));
+            
+            var cacheKey = "TwoFactorValidateCode@" + model.UserName;
+
+            var cacheItem = await _cacheManager
+                .GetTwoFactorCodeCache()
+                .GetOrDefaultAsync(cacheKey);
+
+            if (cacheItem != null)
+                throw new UserFriendlyException(L("SendSecurityCodeErrorMessage"));
+
+            cacheItem = new TwoFactorCodeCacheItem();
+            cacheItem.Code = new Random().Next(999999).ToString("D6");
+
+            await _cacheManager
+                .GetTwoFactorCodeCache()
+                .SetAsync(cacheKey, cacheItem, null, TimeSpan.FromHours(1));
+
+            if (model.Provider == "Email")
+            {
+                var message = L("EmailSecurityCodeBody", cacheItem.Code);
+                await _emailSender.SendAsync(model.UserName, L("EmailSecurityCodeSubject"),
+                    message);
+            }
+            else if (model.Provider == "Phone")
+            {
+                await _smsSender.SendAsync(model.UserName,
+                    SettingManager.GetSettingValue(AppSettings.SMSManagement.UserIdentityValidateTemplateCode),
+                    "{\"code\":\"" + cacheItem.Code + "\"}");
+            }
         }
 
         [HttpPost]
@@ -223,7 +279,7 @@ namespace Iconiz.Boilerplate.Web.Controllers
             {
                 AccessToken = accessToken,
                 EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
-                ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds
+                ExpireInSeconds = (int) _configuration.Expiration.TotalSeconds
             };
         }
 
@@ -237,7 +293,7 @@ namespace Iconiz.Boilerplate.Web.Controllers
             {
                 AccessToken = accessToken,
                 EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
-                ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds
+                ExpireInSeconds = (int) _configuration.Expiration.TotalSeconds
             };
         }
 
@@ -248,65 +304,54 @@ namespace Iconiz.Boilerplate.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<ExternalAuthenticateResultModel> ExternalAuthenticate([FromBody] ExternalAuthenticateModel model)
+        public async Task<ExternalAuthenticateResultModel> ExternalAuthenticate(
+            [FromBody] ExternalAuthenticateModel model)
         {
             var externalUser = await GetExternalUserInfo(model);
 
-            var loginResult = await _logInManager.LoginAsync(new UserLoginInfo(model.AuthProvider, model.ProviderKey, model.AuthProvider), GetTenancyNameOrNull());
+            var loginResult = await _logInManager.LoginAsync(
+                new UserLoginInfo(model.AuthProvider, model.ProviderKey, model.AuthProvider), GetTenancyNameOrNull());
 
             switch (loginResult.Result)
             {
                 case AbpLoginResultType.Success:
+                {
+                    var accessToken = CreateAccessToken(CreateJwtClaims(loginResult.Identity));
+
+                    var returnUrl = model.ReturnUrl;
+
+                    if (model.SingleSignIn.HasValue && model.SingleSignIn.Value &&
+                        loginResult.Result == AbpLoginResultType.Success)
                     {
-                        var accessToken = CreateAccessToken(CreateJwtClaims(loginResult.Identity));
-
-                        var returnUrl = model.ReturnUrl;
-
-                        if (model.SingleSignIn.HasValue && model.SingleSignIn.Value && loginResult.Result == AbpLoginResultType.Success)
-                        {
-                            loginResult.User.SetSignInToken();
-                            returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, loginResult.User.SignInToken, loginResult.User.Id, loginResult.User.TenantId);
-                        }
-
-                        return new ExternalAuthenticateResultModel
-                        {
-                            AccessToken = accessToken,
-                            EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
-                            ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds,
-                            ReturnUrl = returnUrl
-                        };
+                        loginResult.User.SetSignInToken();
+                        returnUrl = AddSingleSignInParametersToReturnUrl(model.ReturnUrl, loginResult.User.SignInToken,
+                            loginResult.User.Id, loginResult.User.TenantId);
                     }
+
+                    return new ExternalAuthenticateResultModel
+                    {
+                        AccessToken = accessToken,
+                        EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
+                        ExpireInSeconds = (int) _configuration.Expiration.TotalSeconds,
+                        ReturnUrl = returnUrl
+                    };
+                }
                 case AbpLoginResultType.UnknownExternalLogin:
+                {
+                    var newUser = await RegisterExternalUserAsync(externalUser);
+                    if (!newUser.IsActive)
                     {
-                        var newUser = await RegisterExternalUserAsync(externalUser);
-                        if (!newUser.IsActive)
-                        {
-                            return new ExternalAuthenticateResultModel
-                            {
-                                WaitingForActivation = true
-                            };
-                        }
-
-                        //Try to login again with newly registered user!
-                        loginResult = await _logInManager.LoginAsync(new UserLoginInfo(model.AuthProvider, model.ProviderKey, model.AuthProvider), GetTenancyNameOrNull());
-                        if (loginResult.Result != AbpLoginResultType.Success)
-                        {
-                            throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(
-                                loginResult.Result,
-                                model.ProviderKey,
-                                GetTenancyNameOrNull()
-                            );
-                        }
-
-                        var accessToken = CreateAccessToken(CreateJwtClaims(loginResult.Identity));
                         return new ExternalAuthenticateResultModel
                         {
-                            AccessToken = accessToken,
-                            EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
-                            ExpireInSeconds = (int)_configuration.Expiration.TotalSeconds
+                            WaitingForActivation = true
                         };
                     }
-                default:
+
+                    //Try to login again with newly registered user!
+                    loginResult = await _logInManager.LoginAsync(
+                        new UserLoginInfo(model.AuthProvider, model.ProviderKey, model.AuthProvider),
+                        GetTenancyNameOrNull());
+                    if (loginResult.Result != AbpLoginResultType.Success)
                     {
                         throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(
                             loginResult.Result,
@@ -314,6 +359,23 @@ namespace Iconiz.Boilerplate.Web.Controllers
                             GetTenancyNameOrNull()
                         );
                     }
+
+                    var accessToken = CreateAccessToken(CreateJwtClaims(loginResult.Identity));
+                    return new ExternalAuthenticateResultModel
+                    {
+                        AccessToken = accessToken,
+                        EncryptedAccessToken = GetEncrpyedAccessToken(accessToken),
+                        ExpireInSeconds = (int) _configuration.Expiration.TotalSeconds
+                    };
+                }
+                default:
+                {
+                    throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(
+                        loginResult.Result,
+                        model.ProviderKey,
+                        GetTenancyNameOrNull()
+                    );
+                }
             }
         }
 
@@ -332,7 +394,7 @@ namespace Iconiz.Boilerplate.Web.Controllers
                 AbpSession.ToUserIdentifier(),
                 message,
                 severity.ToPascalCase().ToEnum<NotificationSeverity>()
-                );
+            );
 
             return Content("Sent notification: " + message);
         }
@@ -346,9 +408,10 @@ namespace Iconiz.Boilerplate.Web.Controllers
                 externalLoginInfo.Surname,
                 externalLoginInfo.EmailAddress,
                 externalLoginInfo.EmailAddress.ToMd5(),
+                null,
                 Authorization.Users.User.CreateRandomPassword(),
                 true,
-                null
+                false
             );
 
             user.Logins = new List<UserLogin>
@@ -377,9 +440,11 @@ namespace Iconiz.Boilerplate.Web.Controllers
             return userInfo;
         }
 
-        private async Task<bool> IsTwoFactorAuthRequiredAsync(AbpLoginResult<Tenant, User> loginResult, AuthenticateModel authenticateModel)
+        private async Task<bool> IsTwoFactorAuthRequiredAsync(AbpLoginResult<Tenant, User> loginResult,
+            AuthenticateModel authenticateModel)
         {
-            if (!await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.TwoFactorLogin.IsEnabled))
+            if (!await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.TwoFactorLogin
+                .IsEnabled))
             {
                 return false;
             }
@@ -402,9 +467,11 @@ namespace Iconiz.Boilerplate.Web.Controllers
             return true;
         }
 
-        private async Task<bool> TwoFactorClientRememberedAsync(UserIdentifier userIdentifier, AuthenticateModel authenticateModel)
+        private async Task<bool> TwoFactorClientRememberedAsync(UserIdentifier userIdentifier,
+            AuthenticateModel authenticateModel)
         {
-            if (!await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.TwoFactorLogin.IsRememberBrowserEnabled))
+            if (!await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.TwoFactorLogin
+                .IsRememberBrowserEnabled))
             {
                 return false;
             }
@@ -430,7 +497,8 @@ namespace Iconiz.Boilerplate.Web.Controllers
                         try
                         {
                             SecurityToken validatedToken;
-                            var principal = validator.ValidateToken(authenticateModel.TwoFactorRememberClientToken, validationParameters, out validatedToken);
+                            var principal = validator.ValidateToken(authenticateModel.TwoFactorRememberClientToken,
+                                validationParameters, out validatedToken);
                             var useridentifierClaim = principal.FindFirst(c => c.Type == UserIdentifierClaimType);
                             if (useridentifierClaim == null)
                             {
@@ -464,7 +532,8 @@ namespace Iconiz.Boilerplate.Web.Controllers
 
             if (provider == GoogleAuthenticatorProvider.Name)
             {
-                if (!await _googleAuthenticatorProvider.ValidateAsync("TwoFactor", authenticateModel.TwoFactorVerificationCode, _userManager, user))
+                if (!await _googleAuthenticatorProvider.ValidateAsync("TwoFactor",
+                    authenticateModel.TwoFactorVerificationCode, _userManager, user))
                 {
                     throw new UserFriendlyException(L("InvalidSecurityCode"));
                 }
@@ -479,7 +548,8 @@ namespace Iconiz.Boilerplate.Web.Controllers
 
             if (authenticateModel.RememberClient)
             {
-                if (await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.TwoFactorLogin.IsRememberBrowserEnabled))
+                if (await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.TwoFactorLogin
+                    .IsRememberBrowserEnabled))
                 {
                     return CreateAccessToken(new[]
                         {
@@ -503,7 +573,8 @@ namespace Iconiz.Boilerplate.Web.Controllers
             return _tenantCache.GetOrNull(AbpSession.TenantId.Value)?.TenancyName;
         }
 
-        private async Task<AbpLoginResult<Tenant, User>> GetLoginResultAsync(string usernameOrEmailAddress, string password, string tenancyName)
+        private async Task<AbpLoginResult<Tenant, User>> GetLoginResultAsync(string usernameOrEmailAddress,
+            string password, string tenancyName)
         {
             var loginResult = await _logInManager.LoginAsync(usernameOrEmailAddress, password, tenancyName);
 
@@ -512,7 +583,8 @@ namespace Iconiz.Boilerplate.Web.Controllers
                 case AbpLoginResultType.Success:
                     return loginResult;
                 default:
-                    throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(loginResult.Result, usernameOrEmailAddress, tenancyName);
+                    throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(loginResult.Result,
+                        usernameOrEmailAddress, tenancyName);
             }
         }
 
@@ -550,13 +622,15 @@ namespace Iconiz.Boilerplate.Web.Controllers
             claims.AddRange(new[]
             {
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.Now.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.Now.ToUnixTimeSeconds().ToString(),
+                    ClaimValueTypes.Integer64)
             });
 
             return claims;
         }
 
-        private string AddSingleSignInParametersToReturnUrl(string returnUrl, string signInToken, long userId, int? tenantId)
+        private string AddSingleSignInParametersToReturnUrl(string returnUrl, string signInToken, long userId,
+            int? tenantId)
         {
             returnUrl += (returnUrl.Contains("?") ? "&" : "?") +
                          "accessToken=" + signInToken +

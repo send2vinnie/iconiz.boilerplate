@@ -12,7 +12,7 @@ namespace Iconiz.Boilerplate.Authorization.Accounts
 
         Task<RegisterOutput> Register(RegisterInput input);
 
-        Task SendPasswordResetCode(SendPasswordResetCodeInput input);
+        Task<CheckPasswordResetCodeOutput> CheckPasswordResetCode(CheckPasswordResetCodeInput input);
 
         Task<ResetPasswordOutput> ResetPassword(ResetPasswordInput input);
 

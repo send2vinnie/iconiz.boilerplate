@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Iconiz.Boilerplate.Web.Authentication.TwoFactor
+namespace Iconiz.Boilerplate.Authentication.TwoFactor
 {
     [Serializable]
     public class TwoFactorCodeCacheItem

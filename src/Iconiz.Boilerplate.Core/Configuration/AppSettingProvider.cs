@@ -64,7 +64,24 @@ namespace Iconiz.Boilerplate.Configuration
 
                 new SettingDefinition(AppSettings.UiManagement.Footer.FixedFooter, GetFromAppSettings(AppSettings.UiManagement.Footer.FixedFooter, "false"),isVisibleToClients: true, scopes: SettingScopes.All),
                 
-                new SettingDefinition(AppSettings.UiManagement.Theme, GetFromAppSettings(AppSettings.UiManagement.Theme, "default"),isVisibleToClients: true, scopes: SettingScopes.All)
+                new SettingDefinition(AppSettings.UiManagement.Theme, GetFromAppSettings(AppSettings.UiManagement.Theme, "default"),isVisibleToClients: true, scopes: SettingScopes.All),
+                // Sms config
+                new SettingDefinition(AppSettings.SMSManagement.AppKey, GetFromAppSettings(AppSettings.SMSManagement.AppKey, "LTAIccbcdjr7DoKK"),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(AppSettings.SMSManagement.AppSecret, GetFromAppSettings(AppSettings.SMSManagement.AppSecret, "fnvbeO2r8w8jKYA82K4dLHILfRPvKb"),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(AppSettings.SMSManagement.SignName, GetFromAppSettings(AppSettings.SMSManagement.SignName, "标准资本"),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(AppSettings.SMSManagement.UserIdentityValidateTemplateCode, GetFromAppSettings(AppSettings.SMSManagement.UserIdentityValidateTemplateCode, "SMS_137705015"),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(AppSettings.SMSManagement.UserLoginConfirmTemplateCode, GetFromAppSettings(AppSettings.SMSManagement.UserLoginConfirmTemplateCode, "SMS_137705014"),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(AppSettings.SMSManagement.UserLoginErrorTemplateCode, GetFromAppSettings(AppSettings.SMSManagement.UserLoginErrorTemplateCode, "SMS_137705013"),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(AppSettings.SMSManagement.UserRegisterTemplateCode, GetFromAppSettings(AppSettings.SMSManagement.UserRegisterTemplateCode, "SMS_137705012"),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(AppSettings.SMSManagement.UserChangePasswordTemplateCode, GetFromAppSettings(AppSettings.SMSManagement.UserChangePasswordTemplateCode, "SMS_137705011"),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(AppSettings.SMSManagement.UserChangeInformationTemplateCode, GetFromAppSettings(AppSettings.SMSManagement.UserChangeInformationTemplateCode, "SMS_137705010"),isVisibleToClients: true, scopes: SettingScopes.All),
+                // weixin config
+                new SettingDefinition(AppSettings.WechatManagement.AppKey, GetFromAppSettings(AppSettings.WechatManagement.AppKey, "wxdc7dd753d441fb40"),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(AppSettings.WechatManagement.AppSecret, GetFromAppSettings(AppSettings.WechatManagement.AppSecret, ""),isVisibleToClients: true, scopes: SettingScopes.All),
+                // jinse config
+                new SettingDefinition(AppSettings.JinseManagement.AccessKey, GetFromAppSettings(AppSettings.JinseManagement.AccessKey, "62d123757c01fd3818e4250a9b7402e1"),isVisibleToClients: true, scopes: SettingScopes.All),
+                new SettingDefinition(AppSettings.JinseManagement.SecretKey, GetFromAppSettings(AppSettings.JinseManagement.SecretKey, "3773b2d9cc1584ee"),isVisibleToClients: true, scopes: SettingScopes.All)
+
             };
         }
 

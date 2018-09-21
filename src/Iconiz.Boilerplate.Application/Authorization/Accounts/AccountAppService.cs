@@ -4,6 +4,7 @@ using System.Web;
 using Abp.Authorization;
 using Abp.Configuration;
 using Abp.Extensions;
+using Abp.Runtime.Caching;
 using Abp.Runtime.Security;
 using Abp.Runtime.Session;
 using Abp.UI;
@@ -17,6 +18,8 @@ using Iconiz.Boilerplate.Debugging;
 using Iconiz.Boilerplate.MultiTenancy;
 using Iconiz.Boilerplate.Security.Recaptcha;
 using Iconiz.Boilerplate.Url;
+using Iconiz.Boilerplate.Authentication.TwoFactor;
+using Microsoft.EntityFrameworkCore;
 
 namespace Iconiz.Boilerplate.Authorization.Accounts
 {
@@ -30,6 +33,7 @@ namespace Iconiz.Boilerplate.Authorization.Accounts
         private readonly UserRegistrationManager _userRegistrationManager;
         private readonly IImpersonationManager _impersonationManager;
         private readonly IUserLinkManager _userLinkManager;
+        private readonly ICacheManager _cacheManager;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IWebUrlService _webUrlService;
 
@@ -38,6 +42,7 @@ namespace Iconiz.Boilerplate.Authorization.Accounts
             UserRegistrationManager userRegistrationManager,
             IImpersonationManager impersonationManager,
             IUserLinkManager userLinkManager,
+            ICacheManager cacheManager,
             IPasswordHasher<User> passwordHasher,
             IWebUrlService webUrlService)
         {
@@ -45,6 +50,7 @@ namespace Iconiz.Boilerplate.Authorization.Accounts
             _userRegistrationManager = userRegistrationManager;
             _impersonationManager = impersonationManager;
             _userLinkManager = userLinkManager;
+            _cacheManager = cacheManager;
             _passwordHasher = passwordHasher;
             _webUrlService = webUrlService;
 
@@ -65,7 +71,8 @@ namespace Iconiz.Boilerplate.Authorization.Accounts
                 return new IsTenantAvailableOutput(TenantAvailabilityState.InActive);
             }
 
-            return new IsTenantAvailableOutput(TenantAvailabilityState.Available, tenant.Id, _webUrlService.GetServerRootAddress(input.TenancyName));
+            return new IsTenantAvailableOutput(TenantAvailabilityState.Available, tenant.Id,
+                _webUrlService.GetServerRootAddress(input.TenancyName));
         }
 
         public Task<int?> ResolveTenantId(ResolveTenantIdInput input)
@@ -89,37 +96,89 @@ namespace Iconiz.Boilerplate.Authorization.Accounts
 
         public async Task<RegisterOutput> Register(RegisterInput input)
         {
-            if (UseCaptchaOnRegistration())
+            User user = null;
+            if (!input.EmailAddress.IsNullOrEmpty() && !input.EmailAddressValidateCode.IsNullOrEmpty())
             {
-                await RecaptchaValidator.ValidateAsync(input.CaptchaResponse);
+                if (await CheckForTwoFactorValidate(input.EmailAddress, input.EmailAddressValidateCode))
+                    user = await _userRegistrationManager.RegisterAsync(
+                        input.EmailAddress,
+                        input.EmailAddress,
+                        input.EmailAddress,
+                        input.EmailAddress,
+                        null,
+                        input.Password,
+                        true, false);
+                else
+                    throw new UserFriendlyException("验证码错误!");
+            }
+            else if (!input.PhoneNumber.IsNullOrEmpty() && !input.PhoneNumberValidateCode.IsNullOrEmpty())
+            {
+                if (await CheckForTwoFactorValidate(input.PhoneNumber, input.PhoneNumberValidateCode))
+                    user = await _userRegistrationManager.RegisterAsync(
+                        input.PhoneNumber,
+                        input.PhoneNumber,
+                        input.PhoneNumber + "@phonenumber.com",
+                        input.PhoneNumber,
+                        input.PhoneNumber,
+                        input.Password,
+                        false, true);
+                else
+                    throw new UserFriendlyException("验证码错误!");
             }
 
-            var user = await _userRegistrationManager.RegisterAsync(
-                input.Name,
-                input.Surname,
-                input.EmailAddress,
-                input.UserName,
-                input.Password,
-                false,
-                AppUrlService.CreateEmailActivationUrlFormat(AbpSession.TenantId)
-            );
-
-            var isEmailConfirmationRequiredForLogin = await SettingManager.GetSettingValueAsync<bool>(AbpZeroSettingNames.UserManagement.IsEmailConfirmationRequiredForLogin);
-
-            return new RegisterOutput
-            {
-                CanLogin = user.IsActive && (user.IsEmailConfirmed || !isEmailConfirmationRequiredForLogin)
-            };
+            return new RegisterOutput {CanLogin = user.IsActive};
         }
 
-        public async Task SendPasswordResetCode(SendPasswordResetCodeInput input)
+        private async Task<bool> CheckForTwoFactorValidate(string username, string code)
         {
-            var user = await GetUserByChecking(input.EmailAddress);
-            user.SetNewPasswordResetCode();
-            await _userEmailer.SendPasswordResetLinkAsync(
-                user,
-                AppUrlService.CreatePasswordResetUrlFormat(AbpSession.TenantId)
-                );
+            var cacheKey = "TwoFactorValidateCode@" + username;
+
+            var cacheItem = await _cacheManager
+                .GetTwoFactorCodeCache()
+                .GetOrDefaultAsync(cacheKey);
+
+            if (cacheItem != null && cacheItem.Code == code)
+            {
+                await _cacheManager.GetTwoFactorCodeCache().RemoveAsync(cacheKey);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<CheckPasswordResetCodeOutput> CheckPasswordResetCode(CheckPasswordResetCodeInput input)
+        {
+            if (!input.EmailAddress.IsNullOrEmpty() && !input.EmailAddressValidateCode.IsNullOrEmpty())
+            {
+                if (await CheckForTwoFactorValidate(input.EmailAddress, input.EmailAddressValidateCode))
+                {
+                    var user = await GetUserByChecking(input.EmailAddress);
+                    user.SetNewPasswordResetCode();
+                    return new CheckPasswordResetCodeOutput
+                    {
+                        IsCodeValidate = true,
+                        PasswordResetCode = user.PasswordResetCode,
+                        UserId = user.Id
+                    };
+                }
+            }
+
+            if (!input.PhoneNumber.IsNullOrEmpty() && !input.PhoneNumberValidateCode.IsNullOrEmpty())
+            {
+                if (await CheckForTwoFactorValidate(input.PhoneNumber, input.PhoneNumberValidateCode))
+                {
+                    var user = await GetUserByChecking(input.PhoneNumber);
+                    user.SetNewPasswordResetCode();
+                    return new CheckPasswordResetCodeOutput
+                    {
+                        IsCodeValidate = true,
+                        PasswordResetCode = user.PasswordResetCode,
+                        UserId = user.Id
+                    };
+                }
+            }
+
+            return new CheckPasswordResetCodeOutput {IsCodeValidate = false};
         }
 
         public async Task<ResetPasswordOutput> ResetPassword(ResetPasswordInput input)
@@ -132,7 +191,6 @@ namespace Iconiz.Boilerplate.Authorization.Accounts
 
             user.Password = _passwordHasher.HashPassword(user, input.Password);
             user.PasswordResetCode = null;
-            user.IsEmailConfirmed = true;
             user.ShouldChangePasswordOnNextLogin = false;
 
             await UserManager.UpdateAsync(user);
@@ -157,9 +215,11 @@ namespace Iconiz.Boilerplate.Authorization.Accounts
         public async Task ActivateEmail(ActivateEmailInput input)
         {
             var user = await UserManager.GetUserByIdAsync(input.UserId);
-            if (user == null || user.EmailConfirmationCode.IsNullOrEmpty() || user.EmailConfirmationCode != input.ConfirmationCode)
+            if (user == null || user.EmailConfirmationCode.IsNullOrEmpty() ||
+                user.EmailConfirmationCode != input.ConfirmationCode)
             {
-                throw new UserFriendlyException(L("InvalidEmailConfirmationCode"), L("InvalidEmailConfirmationCode_Detail"));
+                throw new UserFriendlyException(L("InvalidEmailConfirmationCode"),
+                    L("InvalidEmailConfirmationCode_Detail"));
             }
 
             user.IsEmailConfirmed = true;
@@ -196,7 +256,8 @@ namespace Iconiz.Boilerplate.Authorization.Accounts
 
             return new SwitchToLinkedAccountOutput
             {
-                SwitchAccountToken = await _userLinkManager.GetAccountSwitchToken(input.TargetUserId, input.TargetTenantId),
+                SwitchAccountToken =
+                    await _userLinkManager.GetAccountSwitchToken(input.TargetUserId, input.TargetTenantId),
                 TenancyName = await GetTenancyNameOrNullAsync(input.TargetTenantId)
             };
         }
@@ -232,13 +293,14 @@ namespace Iconiz.Boilerplate.Authorization.Accounts
             return tenantId.HasValue ? (await GetActiveTenantAsync(tenantId.Value)).TenancyName : null;
         }
 
-        private async Task<User> GetUserByChecking(string inputEmailAddress)
+        private async Task<User> GetUserByChecking(string inputUsername)
         {
-            var user = await UserManager.FindByEmailAsync(inputEmailAddress);
+            var user = await UserManager.FindByNameOrEmailAsync(inputUsername);
             if (user == null)
-            {
-                throw new UserFriendlyException(L("InvalidEmailAddress"));
-            }
+                user = await UserManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == inputUsername);
+
+            if (user == null)
+                throw new UserFriendlyException(L("InvalidUser"));
 
             return user;
         }

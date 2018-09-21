@@ -32,12 +32,12 @@ namespace Iconiz.Boilerplate.Authorization.Users
         private readonly IPasswordHasher<User> _passwordHasher;
 
         public UserRegistrationManager(
-            TenantManager tenantManager, 
+            TenantManager tenantManager,
             UserManager userManager,
-            RoleManager roleManager, 
-            IUserEmailer userEmailer, 
-            INotificationSubscriptionManager notificationSubscriptionManager, 
-            IAppNotifier appNotifier, 
+            RoleManager roleManager,
+            IUserEmailer userEmailer,
+            INotificationSubscriptionManager notificationSubscriptionManager,
+            IAppNotifier appNotifier,
             IUserPolicy userPolicy,
             IPasswordHasher<User> passwordHasher)
         {
@@ -53,13 +53,16 @@ namespace Iconiz.Boilerplate.Authorization.Users
             AbpSession = NullAbpSession.Instance;
         }
 
-        public async Task<User> RegisterAsync(string name, string surname, string emailAddress, string userName, string plainPassword, bool isEmailConfirmed, string emailActivationLink)
+        public async Task<User> RegisterAsync(string name, string surname, string emailAddress, string userName, string phoneNumber,
+            string plainPassword, bool isEmailConfirmed, bool isPhoneConfirmed)
         {
             CheckForTenant();
             CheckSelfRegistrationIsEnabled();
 
             var tenant = await GetActiveTenantAsync();
-            var isNewRegisteredUserActiveByDefault = await SettingManager.GetSettingValueAsync<bool>(AppSettings.UserManagement.IsNewRegisteredUserActiveByDefault);
+            var isNewRegisteredUserActiveByDefault =
+                await SettingManager.GetSettingValueAsync<bool>(AppSettings.UserManagement
+                    .IsNewRegisteredUserActiveByDefault);
 
             await _userPolicy.CheckMaxUserCountAsync(tenant.Id);
 
@@ -71,7 +74,9 @@ namespace Iconiz.Boilerplate.Authorization.Users
                 EmailAddress = emailAddress,
                 IsActive = isNewRegisteredUserActiveByDefault,
                 UserName = userName,
+                PhoneNumber = phoneNumber,
                 IsEmailConfirmed = isEmailConfirmed,
+                IsPhoneNumberConfirmed = isPhoneConfirmed,
                 Roles = new List<UserRole>()
             };
 
@@ -86,12 +91,6 @@ namespace Iconiz.Boilerplate.Authorization.Users
 
             CheckErrors(await _userManager.CreateAsync(user));
             await CurrentUnitOfWork.SaveChangesAsync();
-
-            if (!user.IsEmailConfirmed)
-            {
-                user.SetNewEmailConfirmationCode();
-                await _userEmailer.SendEmailActivationLinkAsync(user, emailActivationLink);
-            }
 
             //Notifications
             await _notificationSubscriptionManager.SubscribeToAllAvailableNotificationsAsync(user.ToUserIdentifier());
