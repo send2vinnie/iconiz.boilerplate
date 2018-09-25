@@ -22,7 +22,15 @@ namespace Iconiz.Boilerplate.Configuration.Tenants.Dto
 
         public TenantBillingSettingsEditDto Billing { get; set; }
 
-
+        [Required]
+        public WeixinSettingsEditDto Weixin { get; set; }
+        
+        [Required]
+        public JinseSettingsEditDto Jinse { get; set; }
+        
+        [Required]
+        public SMSSettingsEditDto SMS { get; set; }
+        
         /// <summary>
         /// This validation is done for single-tenant applications.
         /// Because, these settings can only be set by tenant in a single-tenant application.

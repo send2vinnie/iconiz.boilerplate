@@ -235,31 +235,24 @@ namespace Iconiz.Boilerplate.Web.Controllers
         [HttpPost]
         public async Task SendTwoFactorValidateCode([FromBody] SendTwoFactorValidateCodeModel model)
         {
-            var user = _userManager.FindByNameOrEmailAsync(model.UserName);
-            if(user!=null)
-                throw new UserFriendlyException(L("UserAlreadyRegistered"));
-            
             var cacheKey = "TwoFactorValidateCode@" + model.UserName;
 
             var cacheItem = await _cacheManager
                 .GetTwoFactorCodeCache()
                 .GetOrDefaultAsync(cacheKey);
 
-            if (cacheItem != null)
-                throw new UserFriendlyException(L("SendSecurityCodeErrorMessage"));
-
-            cacheItem = new TwoFactorCodeCacheItem();
-            cacheItem.Code = new Random().Next(999999).ToString("D6");
-
-            await _cacheManager
-                .GetTwoFactorCodeCache()
-                .SetAsync(cacheKey, cacheItem, null, TimeSpan.FromHours(1));
+            if (cacheItem == null)
+            {
+                cacheItem = new TwoFactorCodeCacheItem();
+                cacheItem.Code = new Random().Next(999999).ToString("D6");
+                await _cacheManager
+                    .GetTwoFactorCodeCache()
+                    .SetAsync(cacheKey, cacheItem, null, TimeSpan.FromMinutes(5));
+            }
 
             if (model.Provider == "Email")
             {
-                var message = L("EmailSecurityCodeBody", cacheItem.Code);
-                await _emailSender.SendAsync(model.UserName, L("EmailSecurityCodeSubject"),
-                    message);
+                await _emailSender.SendAsync(model.UserName, "邮箱验证", "您的邮箱验证码为：" + cacheItem.Code);
             }
             else if (model.Provider == "Phone")
             {

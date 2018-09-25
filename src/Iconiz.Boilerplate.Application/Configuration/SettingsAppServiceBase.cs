@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Abp.Authorization;
 using Abp.Net.Mail;
 using Iconiz.Boilerplate.Configuration.Host.Dto;
 

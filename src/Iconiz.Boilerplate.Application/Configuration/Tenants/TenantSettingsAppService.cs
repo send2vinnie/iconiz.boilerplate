@@ -48,7 +48,10 @@ namespace Iconiz.Boilerplate.Configuration.Tenants
             {
                 UserManagement = await GetUserManagementSettingsAsync(),
                 Security = await GetSecuritySettingsAsync(),
-                Billing = await GetBillingSettingsAsync()
+                Billing = await GetBillingSettingsAsync(),
+                Weixin = await GetWexinManagementSettingsAsync(),
+                Jinse = await GetJinseManagementSettingsAsync(),
+                SMS = await GetSMSManagementSettingsAsync()
             };
 
             if (!_multiTenancyConfig.IsEnabled || Clock.SupportsMultipleTimezone)
@@ -66,7 +69,7 @@ namespace Iconiz.Boilerplate.Configuration.Tenants
                 }
                 else
                 {
-                    settings.Ldap = new LdapSettingsEditDto { IsModuleEnabled = false };
+                    settings.Ldap = new LdapSettingsEditDto {IsModuleEnabled = false};
                 }
             }
 
@@ -123,6 +126,40 @@ namespace Iconiz.Boilerplate.Configuration.Tenants
             }
 
             return settings;
+        }
+
+        private async Task<WeixinSettingsEditDto> GetWexinManagementSettingsAsync()
+        {
+            return new WeixinSettingsEditDto
+            {
+                AppKey = await SettingManager.GetSettingValueAsync(AppSettings.WechatManagement.AppKey),
+                AppSecret = await SettingManager.GetSettingValueAsync(AppSettings.WechatManagement.AppSecret),
+            };
+        }
+
+        private async Task<JinseSettingsEditDto> GetJinseManagementSettingsAsync()
+        {
+            return new JinseSettingsEditDto()
+            {
+                AccessKey = await SettingManager.GetSettingValueAsync(AppSettings.JinseManagement.AccessKey),
+                SecretKey = await SettingManager.GetSettingValueAsync(AppSettings.JinseManagement.SecretKey),
+            };
+        }
+
+        private async Task<SMSSettingsEditDto> GetSMSManagementSettingsAsync()
+        {
+            return new SMSSettingsEditDto()
+            {
+                AppKey = await SettingManager.GetSettingValueAsync(AppSettings.SMSManagement.AppKey),
+                AppSecret = await SettingManager.GetSettingValueAsync(AppSettings.SMSManagement.AppSecret),
+                SignName = await SettingManager.GetSettingValueAsync(AppSettings.SMSManagement.SignName),
+                UserIdentityValidateTemplateCode = await SettingManager.GetSettingValueAsync(AppSettings.SMSManagement.UserIdentityValidateTemplateCode),
+                UserLoginConfirmTemplateCode = await SettingManager.GetSettingValueAsync(AppSettings.SMSManagement.UserLoginConfirmTemplateCode),
+                UserLoginErrorTemplateCode = await SettingManager.GetSettingValueAsync(AppSettings.SMSManagement.UserLoginErrorTemplateCode),
+                UserRegisterTemplateCode = await SettingManager.GetSettingValueAsync(AppSettings.SMSManagement.UserRegisterTemplateCode),
+                UserChangePasswordTemplateCode = await SettingManager.GetSettingValueAsync(AppSettings.SMSManagement.UserChangePasswordTemplateCode),
+                UserChangeInformationTemplateCode = await SettingManager.GetSettingValueAsync(AppSettings.SMSManagement.UserChangeInformationTemplateCode),
+            };
         }
 
         private async Task<TenantUserManagementSettingsEditDto> GetUserManagementSettingsAsync()
@@ -225,7 +262,9 @@ namespace Iconiz.Boilerplate.Configuration.Tenants
             await UpdateUserManagementSettingsAsync(input.UserManagement);
             await UpdateSecuritySettingsAsync(input.Security);
             await UpdateBillingSettingsAsync(input.Billing);
-
+            await UpdateWeixinSettingsAsync(input.Weixin);
+            await UpdateJinseSettingsAsync(input.Jinse);
+            await UpdatSMSSettingsAsync(input.SMS);
 
             //Time Zone
             if (Clock.SupportsMultipleTimezone)
@@ -254,12 +293,36 @@ namespace Iconiz.Boilerplate.Configuration.Tenants
             }
         }
 
+        private async Task UpdateWeixinSettingsAsync(WeixinSettingsEditDto input)
+        {
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.WechatManagement.AppKey, input.AppKey);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.WechatManagement.AppSecret, input.AppSecret);
+        }
+
+        private async Task UpdateJinseSettingsAsync(JinseSettingsEditDto input)
+        {
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.JinseManagement.AccessKey, input.AccessKey);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.JinseManagement.SecretKey, input.SecretKey);
+        }
+
+        private async Task UpdatSMSSettingsAsync(SMSSettingsEditDto input)
+        {
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.SMSManagement.AppKey, input.AppKey);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.SMSManagement.AppSecret, input.AppSecret);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.SMSManagement.SignName, input.SignName);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.SMSManagement.UserIdentityValidateTemplateCode, input.UserIdentityValidateTemplateCode);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.SMSManagement.UserLoginConfirmTemplateCode, input.UserLoginConfirmTemplateCode);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.SMSManagement.UserLoginErrorTemplateCode, input.UserLoginErrorTemplateCode);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.SMSManagement.UserRegisterTemplateCode, input.UserRegisterTemplateCode);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.SMSManagement.UserChangePasswordTemplateCode, input.UserChangePasswordTemplateCode);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.SMSManagement.UserChangeInformationTemplateCode, input.UserChangeInformationTemplateCode);
+        }
+
         private async Task UpdateBillingSettingsAsync(TenantBillingSettingsEditDto input)
         {
-            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(),AppSettings.TenantManagement.BillingLegalName, input.LegalName);
-            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(),AppSettings.TenantManagement.BillingAddress, input.Address);
-            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(),AppSettings.TenantManagement.BillingTaxVatNo, input.TaxVatNo);
-
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.TenantManagement.BillingLegalName, input.LegalName);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.TenantManagement.BillingAddress, input.Address);
+            await SettingManager.ChangeSettingForTenantAsync(AbpSession.GetTenantId(), AppSettings.TenantManagement.BillingTaxVatNo, input.TaxVatNo);
         }
 
         private async Task UpdateLdapSettingsAsync(LdapSettingsEditDto input)

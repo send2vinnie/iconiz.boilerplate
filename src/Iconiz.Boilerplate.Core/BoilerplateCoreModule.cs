@@ -74,7 +74,7 @@ namespace Iconiz.Boilerplate
             if (DebugHelper.IsDebug)
             {
                 //Disabling email sending in debug mode
-                Configuration.ReplaceService<IEmailSender, NullEmailSender>(DependencyLifeStyle.Transient);
+                //Configuration.ReplaceService<IEmailSender, NullEmailSender>(DependencyLifeStyle.Transient);
             }
 
             Configuration.ReplaceService(typeof(IEmailSenderConfiguration), () =>
@@ -85,6 +85,8 @@ namespace Iconiz.Boilerplate
                              .LifestyleTransient()
                 );
             });
+            
+            Configuration.ReplaceService<IMailKitSmtpBuilder, NoCertificateMailKitSmtpBuilder>(DependencyLifeStyle.Transient);
 
             Configuration.Caching.Configure(FriendCacheItem.CacheName, cache =>
             {
