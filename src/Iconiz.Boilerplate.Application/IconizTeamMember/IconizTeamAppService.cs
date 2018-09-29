@@ -65,7 +65,7 @@ namespace Iconiz.Boilerplate.IconizTeamMember
             return new PagedResultDto<IconizTeamMemberListDto>(resultCount, teamMembers);
         }
 
-        [AbpAuthorize(AppPermissions.Pages_IconizTeamMember_Create, AppPermissions.Pages_IconizTeamMember_Edit)]
+        [AbpAuthorize(AppPermissions.Pages_IconizTeamMember)]
         public async Task<TeamMemberEditDto> GetIconizTeamMemberForEdit(NullableIdDto input)
         {
             if (input.Id.HasValue)
@@ -77,7 +77,7 @@ namespace Iconiz.Boilerplate.IconizTeamMember
             return null;
         }
 
-        [AbpAuthorize(AppPermissions.Pages_IconizTeamMember_Create, AppPermissions.Pages_IconizTeamMember_Edit)]
+        [AbpAuthorize(AppPermissions.Pages_IconizTeamMember)]
         public async Task CreateOrUpdateIconizTeamMember(TeamMemberEditDto input)
         {
             if (!input.Id.HasValue || input.Id.Value == 0)
@@ -90,14 +90,14 @@ namespace Iconiz.Boilerplate.IconizTeamMember
             }
         }
 
-        [AbpAuthorize(AppPermissions.Pages_IconizTeamMember_Delete)]
+        [AbpAuthorize(AppPermissions.Pages_IconizTeamMember)]
         public async Task DeleteIconizTeamMember(EntityDto input)
         {
             var teamMember = await _iconizTeamMemberRepository.GetAsync(input.Id);
             await _iconizTeamMemberRepository.DeleteAsync(teamMember);
         }
 
-        [AbpAuthorize(AppPermissions.Pages_IconizTeamMember_Create)]
+        [AbpAuthorize(AppPermissions.Pages_IconizTeamMember)]
         protected virtual async Task CreateIconizTeamMemberAsync(TeamMemberEditDto input)
         {
             var iconizTeamMember = ObjectMapper.Map<IconizTeamMember>(input);
@@ -109,7 +109,7 @@ namespace Iconiz.Boilerplate.IconizTeamMember
             await CurrentUnitOfWork.SaveChangesAsync();
         }
 
-        [AbpAuthorize(AppPermissions.Pages_IconizTeamMember_Edit)]
+        [AbpAuthorize(AppPermissions.Pages_IconizTeamMember)]
         protected virtual async Task UpdateIconizTeamMemberAsync(TeamMemberEditDto input)
         {
             var iconizTeamMember = await _iconizTeamMemberRepository.GetAsync(input.Id.Value);

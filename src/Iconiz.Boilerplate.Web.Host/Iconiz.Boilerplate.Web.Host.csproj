@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
-  <Import Project="..\..\common.props"></Import>
-   
+  <Import Project="..\..\common.props">
+  </Import>
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
@@ -14,18 +13,15 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
-  
   <ItemGroup>
     <Compile Remove="App_Data\**" />
     <Content Remove="App_Data\**" />
     <EmbeddedResource Remove="App_Data\**" />
     <None Remove="App_Data\**" />
   </ItemGroup>
-  
   <ItemGroup>
     <Content Remove="wwwroot\swagger\ui\index.html" />
   </ItemGroup>
-  
   <ItemGroup>
     <None Include="app.config" />
     <None Include="wwwroot\Plugins\.gitkeep" />
@@ -40,11 +36,9 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Iconiz.Boilerplate.Web.Core\Iconiz.Boilerplate.Web.Core.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="2.1.0" />
@@ -57,18 +51,14 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.0" />
     <PackageReference Include="Abp.Castle.Log4Net" Version="3.7.2" />
   </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\swagger\ui\index.html" />
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="wwwroot\Plugins\" />
   </ItemGroup>
-
 </Project>

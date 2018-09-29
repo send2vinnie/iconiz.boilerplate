@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Iconiz.Boilerplate.Configuration;
 using Iconiz.Boilerplate.EntityFrameworkCore;
+using Iconiz.Boilerplate.IconizFinance;
 using Iconiz.Boilerplate.MultiTenancy;
 
 namespace Iconiz.Boilerplate.Web.Startup
@@ -53,9 +54,12 @@ namespace Iconiz.Boilerplate.Web.Startup
                 }
             }
 
+            var workManager = IocManager.Resolve<IBackgroundWorkerManager>();
+            //workManager.Add(IocManager.Resolve<JinseTopicSyncWorker>());
+            workManager.Add(IocManager.Resolve<JinseSymbolsSyncWorker>());
+            
             if (IocManager.Resolve<IMultiTenancyConfig>().IsEnabled)
             {
-                var workManager = IocManager.Resolve<IBackgroundWorkerManager>();
                 workManager.Add(IocManager.Resolve<SubscriptionExpirationCheckWorker>());
                 workManager.Add(IocManager.Resolve<SubscriptionExpireEmailNotifierWorker>());
             }

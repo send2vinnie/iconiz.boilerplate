@@ -32,6 +32,10 @@ namespace Iconiz.Boilerplate.EntityFrameworkCore
         public virtual DbSet<PersistedGrantEntity> PersistedGrants { get; set; }
         
         public virtual DbSet<IconizTeamMember.IconizTeamMember> IconizTeamMembers { get; set; }
+        
+        public virtual DbSet<IconizFinance.IconizTopic> IconizTopic { get; set; }
+        
+        public virtual DbSet<IconizFinance.IconizTopicComment> IconizTopicComment { get; set; }
 
         public BoilerplateDbContext(DbContextOptions<BoilerplateDbContext> options)
             : base(options)
@@ -74,6 +78,12 @@ namespace Iconiz.Boilerplate.EntityFrameworkCore
             {
                 b.HasIndex(e => new { e.Status, e.CreationTime });
                 b.HasIndex(e => new { e.PaymentId, e.Gateway });
+            });
+            
+            modelBuilder.Entity<IconizFinance.IconizTopic>(b =>
+            {
+                b.HasIndex(e => new { e.SourceId });
+                b.HasIndex(e => new { e.Source, e.SourceId });
             });
 
             modelBuilder.ConfigurePersistedGrantEntity();

@@ -3,14 +3,16 @@ using System;
 using Iconiz.Boilerplate.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Iconiz.Boilerplate.Migrations
 {
     [DbContext(typeof(BoilerplateDbContext))]
-    partial class BoilerplateDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180927045500_topic_extern")]
+    partial class topic_extern
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1132,7 +1134,7 @@ namespace Iconiz.Boilerplate.Migrations
 
                     b.Property<float>("Raty");
 
-                    b.Property<int>("ReadCount");
+                    b.Property<string>("ReadCount");
 
                     b.Property<string>("Resource")
                         .HasMaxLength(50);

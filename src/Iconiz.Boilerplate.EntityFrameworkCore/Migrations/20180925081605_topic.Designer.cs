@@ -3,14 +3,16 @@ using System;
 using Iconiz.Boilerplate.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Iconiz.Boilerplate.Migrations
 {
     [DbContext(typeof(BoilerplateDbContext))]
-    partial class BoilerplateDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180925081605_topic")]
+    partial class topic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1111,11 +1113,7 @@ namespace Iconiz.Boilerplate.Migrations
                     b.Property<string>("Author")
                         .HasMaxLength(50);
 
-                    b.Property<string>("Category")
-                        .HasMaxLength(16);
-
-                    b.Property<string>("Category2")
-                        .HasMaxLength(16);
+                    b.Property<int>("CommentStatus");
 
                     b.Property<int>("CommitCount");
 
@@ -1125,14 +1123,9 @@ namespace Iconiz.Boilerplate.Migrations
 
                     b.Property<int>("DownCount");
 
-                    b.Property<string>("KeyWords")
-                        .HasMaxLength(200);
-
                     b.Property<DateTime>("PublishTime");
 
-                    b.Property<float>("Raty");
-
-                    b.Property<int>("ReadCount");
+                    b.Property<string>("ReadCount");
 
                     b.Property<string>("Resource")
                         .HasMaxLength(50);
@@ -1154,8 +1147,6 @@ namespace Iconiz.Boilerplate.Migrations
                     b.Property<string>("Title")
                         .HasMaxLength(200);
 
-                    b.Property<int>("TopicCommentStatus");
-
                     b.Property<int>("TopicStatus");
 
                     b.Property<int>("UpCount");
@@ -1166,8 +1157,6 @@ namespace Iconiz.Boilerplate.Migrations
                     b.Property<long?>("UserId");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SourceId");
 
                     b.HasIndex("Source", "SourceId");
 
@@ -1190,6 +1179,8 @@ namespace Iconiz.Boilerplate.Migrations
                     b.Property<string>("AuthorName")
                         .HasMaxLength(50);
 
+                    b.Property<int>("CommentStatus");
+
                     b.Property<string>("Content");
 
                     b.Property<DateTime>("CreationTime");
@@ -1197,8 +1188,6 @@ namespace Iconiz.Boilerplate.Migrations
                     b.Property<int>("Parent");
 
                     b.Property<int>("Raty");
-
-                    b.Property<int>("TopicCommentStatus");
 
                     b.Property<int>("TopicId");
 

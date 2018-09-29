@@ -48,6 +48,7 @@
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Iconiz.Boilerplate.Application.Shared\Iconiz.Boilerplate.Application.Shared.csproj" />
     <ProjectReference Include="..\Iconiz.Boilerplate.Core.Shared\Iconiz.Boilerplate.Core.Shared.csproj" />
   </ItemGroup>
 </Project>

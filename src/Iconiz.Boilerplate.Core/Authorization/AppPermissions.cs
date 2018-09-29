@@ -68,10 +68,8 @@
         public const string Pages_Administration_Host_Dashboard = "Pages.Administration.Host.Dashboard";
         
         //ICONIZ
-        
         public const string Pages_IconizTeamMember = "Pages.IconizTeamMember";
-        public const string Pages_IconizTeamMember_Create = "Pages.IconizTeamMember.Create";
-        public const string Pages_IconizTeamMember_Edit = "Pages.IconizTeamMember.Edit";
-        public const string Pages_IconizTeamMember_Delete = "Pages.IconizTeamMember.Delete";
+        
+        public const string Pages_IconizTopic = "Pages.IconizTopic";
     }
 }

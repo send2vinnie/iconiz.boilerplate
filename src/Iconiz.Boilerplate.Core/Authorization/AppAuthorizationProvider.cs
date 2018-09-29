@@ -59,10 +59,9 @@ namespace Iconiz.Boilerplate.Authorization
 
             administration.CreateChildPermission(AppPermissions.Pages_Administration_UiCustomization, L("VisualSettings"));
 
-            var members = administration.CreateChildPermission(AppPermissions.Pages_IconizTeamMember, L("Members"));
-            members.CreateChildPermission(AppPermissions.Pages_IconizTeamMember_Create, L("CreatingNewMember"));
-            members.CreateChildPermission(AppPermissions.Pages_IconizTeamMember_Edit, L("EditingMember"));
-            members.CreateChildPermission(AppPermissions.Pages_IconizTeamMember_Delete, L("DeletingMember"));
+            administration.CreateChildPermission(AppPermissions.Pages_IconizTeamMember, L("Members"));
+            
+            administration.CreateChildPermission(AppPermissions.Pages_IconizTopic, L("Topic"));
 
             //TENANT-SPECIFIC PERMISSIONS
 

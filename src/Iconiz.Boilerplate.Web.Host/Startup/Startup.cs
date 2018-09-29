@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -27,6 +28,7 @@ using AutoMapper.Internal;
 using Castle.Core.Logging;
 using Castle.Facilities.Logging;
 using Hangfire;
+using Hangfire.MySql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -124,10 +126,11 @@ namespace Iconiz.Boilerplate.Web.Startup
             });
 
             //Hangfire (Enable to use Hangfire instead of default job manager)
-            //services.AddHangfire(config =>
-            //{
-            //    config.UseSqlServerStorage(_appConfiguration.GetConnectionString("Default"));
-            //});
+            services.AddHangfire(config =>
+            {
+                config.UseStorage(new MySqlStorage(_appConfiguration.GetConnectionString("Default"), 
+                    new MySqlStorageOptions()));
+            });
 
             //Configure Abp and Dependency Injection
             return services.AddAbp<BoilerplateWebHostModule>(options =>
@@ -170,18 +173,20 @@ namespace Iconiz.Boilerplate.Web.Startup
                 }
             }
 
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<AbpCommonHub>("/signalr");
-                routes.MapHub<ChatHub>("/signalr-chat");
-            });
+            //app.UseSignalR(routes =>
+            //{
+            //    routes.MapHub<AbpCommonHub>("/signalr");
+            //    routes.MapHub<ChatHub>("/signalr-chat");
+            //});
 
             //Hangfire dashboard & server (Enable to use Hangfire instead of default job manager)
             //app.UseHangfireDashboard("/hangfire", new DashboardOptions
             //{
-            //    Authorization = new[] { new AbpHangfireAuthorizationFilter(AppPermissions.Pages_Administration_HangfireDashboard)  }
+            //    //Authorization = new[] { new AbpHangfireAuthorizationFilter(AppPermissions.Pages_Administration_HangfireDashboard)  }
+            //    Authorization = new[] { new AbpHangfireAuthorizationFilter() }
             //});
-            //app.UseHangfireServer();
+            app.UseHangfireDashboard();
+            app.UseHangfireServer();
 
             app.UseMvc(routes =>
             {
